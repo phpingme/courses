@@ -7,6 +7,7 @@ head:
 A new operator ```<=>``` that is also know as "spaceship operator" and is also exists
 for example in [Ruby](http://ruby-doc.org/core-1.9.3/Comparable.html). All it does it compares to expressions like this:
 ```php
+
   // lefthand expression is lexically larger than righthand one
   "Foo" <=> "foo" // return 1
 
@@ -26,7 +27,6 @@ match: \s?5\.7\s?\<=\>\s?7
 success: null-coalesce-operator
 ---
 ```
-
 
 ## Null Coalesce Operator
 
@@ -58,6 +58,7 @@ success: group-use-declarations
 ```
 
 ## Group use Declarations
+
 The ```use``` statement brings an ability to shortcut ```class```, ```function``` and ```const``` namespaces, at was always a lot of typing, but lets the code besides look better. Now it is possible to reduce an amount of ```use``` statements if the classes have the same parent namespace, and it looks like that:
 
 ```php
