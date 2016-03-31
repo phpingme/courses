@@ -1,0 +1,15 @@
+{
+    "name": "zavalit/php7-intro",
+    "description": "Introduction to PHP7",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vsevolod Dolgopolov",
+            "email": "zavalit@gmail.com"
+        }
+    ],
+    "require": {
+      "php": ">=7.0",
+      "psr/log": "^1.0"
+    }
+}
