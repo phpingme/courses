@@ -295,28 +295,205 @@ success: expectations
 ```
 
 ## Exceptions in the Engine
+It was always pretty straightforward  to build up an ```try/catch``` based error handling in php. The side effect of that simplicity was, that php engine errors and business domain violations have to be catched with an instance of ``` Exception```. With PHP 7 fatal and recoverable fatal errors will from now on throw an instance of ```Error```.  The new hierarchy is the following:
+```
+interface Throwable
+    |- Exception implements Throwable
+        |- ...
+    |- Error implements Throwable
+        |- TypeError extends Error
+        |- ParseError extends Error
+        |- AssertionError extends Error
+        |- ArithmeticError extends Error
+            |- DivisionByZeroError extends ArithmeticError
+```
 
+for example:
+```php
+
+try{
+
+ (function($obj) {
+    $obj->method();
+ })(null);
+
+}catch(Error $e){
+
+    var_dump($e instanceof Exception); // bool(false)
+    var_dump($e instanceof Error);     // bool(true)
+    var_dump($e instanceof Throwable); // bool(true)
+    echo($e->getMessage());            // Call to a member function method() on null
+
+}
+
+```
+Also take a look at how owe closure function was called, it follows the following pattern ```(function () {})()``` and it follows IIFE syntax from JS.
+
+
+> as a task catch a specific ```Error``` child instance (```ParseError```, ```TypeError```, ...) of the following closure function:
+>```php
+>(function(callable $obj) {
+>   $obj->call();
+>})(null);
+>```
+
+```editor+repl
+<?php
+
+// try and catch it
+(function(callable $obj) {
+   $obj->call();
+})(null);
+
+---
+match: catch\s?\(\s?TypeError
+success: expectations
+---
+```
 
 ## Expectations
 
+To prove if the the some expression is true, you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throwing an instance of ```AssertionError```.
 
+```php
 
+ini_set('assert.exception', 1);
+assert(false);
+```
 
+> as a task extend an ```assert()``` function with a second argument as an instance of ```AssertionError``` that takes a custom message as it's constructor argument, just like you would do it with Exception, and surely catch an Error.
+
+```editor+repl
+<?php
+
+ini_set('assert.exception', 1);
+// your assert function within try/catch block
+
+---
+match:
+- AssertionError
+- catch\s?\(
+success: generator-return-expressions
+---
+```
 
 ## Generator Return Expressions
+The use case of iterating smth. is pretty common in php applications, less often is applying an object oriented way to work with iteration. Mostly cause of it bloat up [Iterator](http://php.net/manual/en/class.iterator.php) interface. Generator is a simple way to do it by prepending an ```yield``` operator. But that is actually it. For more advanced use cases like multitasking in coroutine context Generator was quite counterintuitive and made implementing multitasking features quite cumbersome.  With PHP 7+ it's possible to declare a final return expression of a Generator instance.
+
+```php
+$generator = (function(int $index){
+  yield $index++;
+  return $index;
+})(1);
+
+foreach($generator as $i){
+    echo $i . PHP_EOL;        // return 1
+}
+echo $generator->getReturn(); // return 2
+
+```
+
+> as an exercise add some more ```yield``` operators within a closure body from example above and just take a look so that returned value gets to **3**.
+
+```editor+repl
+<?php
+
+---
+match_output: 3
+success: generator-delegation
+---
+```
+
 
 ## Generator Delegation
+Another quiet handy feature in terms of making Generator more handy is it's delegation. In other words along with returning an expression, you can also return another Generator by referencing with ```yield from``` expression to it.
 
-## Integer Division with intdiv()
+```php
+$generator = (function(int $index){
+  yield $index++;
+  return yield from generatorPow($index);
+})(1);
 
-## session_start() Options
+function generatorPow(int $index){
+  yield pow($index, $index);
+  return $index;
+}
 
-## preg_replace_callback_array() Function
+foreach($generator as $item){
+    echo $item, PHP_EOL;   
+}
+echo $generator->getReturn();
 
-## CSPRNG Functions
+// output
+// 1
+// 4
+// 2
 
-## Support for Array Constants in define()
+```
+> as an exercise let the function *generatorPow* from the example above also get delegeted generator, the one that enables the the whole output like:
+```
+>1
+>4
+>16
+>```
+
+
+```editor+repl
+<?php
+
+$generator = (function(int $index){
+  yield $index++;
+  return yield from generatorPow($index);
+})(1);
+
+// overwrite generatorPow function and write a new one that gets delegated to generatorPow
+
+
+// output part
+foreach($generator as $item){
+    echo $item, PHP_EOL;   
+}
+echo $generator->getReturn();
+---
+match_output: 1416
+success: reflection-additions
+---
+```
 
 ## Reflection Additions
+Reflections in php was always a nice tool to inspect classes and when necessary tweak their behavior, for example for tests. In PHP 7 comes with a new reflection classes for Generator namely ```ReflectionGenerator```, and a ```ReflectionType``` that extends an existing reflection classes (```ReflectionParameter```, ```ReflectionFunctionAbstract```) on order to give an access to newly introduced Type Declarations for scalar values and return expressions.
 
-Reflections in php was always a nice tool to inspect classes and sometimes tweak their behavior, for example for tests. In php7 it is now also possible to apply Reflections to Generators or in other words to ```yield``` constructs.
+```php
+$reflector = new ReflectionGenerator((function(){
+  yield 'hello';
+})());
+// public API
+echo $reflector->getExecutingGenerator()->current(); // hello
+echo $reflector->getFunction()->name; // string(9) "{closure}"
+echo $reflector->getExecutingFile(); //  /var/www/test.php
+echo $reflector->getExecutingLine(); // 3
+echo $reflector->getTrace(); // Array
+var_dump($reflector->getThis()); // NULL
+```
+
+> to practice in using ```Generator``` and ```ReflectionGenerator``` let a following generator:
+```
+>(function(){
+  $str = yield;
+  echo $str;
+})()
+```
+> be injected in ```ReflectionGenerator``` instance and let resulted instance output any string you like. For that you may be want to recover a ```Generator``` api http://php.net/manual/de/class.generator.php
+
+
+```editor+repl
+<?php
+
+---
+match: getExecutingGenerator\(\s?\)->send
+success: congrats
+---
+```
+## Congrats
+
+Cool, you've covered the most interesting and useful parts of PHP7. It was not hard.
