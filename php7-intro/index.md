@@ -61,7 +61,7 @@ $foo['some'] ?? $foo['a'] ?? 'another'; // just try it in a Repl below
 ```repl
 ---
 fixture: $foo = ['a'=>1, 'b'=>2];
-match: =\s?\$foo\['c'\]\s?\?\?
+match: \$foo\['c'\]\s?\?\?
 success: group-use-declarations
 ---
 ```
