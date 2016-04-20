@@ -3,7 +3,7 @@ head:
   title: "Php7 Introduction Course"
 ---
 ## Php7 Introduction Course
-Hi, that course is about to cover the basics of new features, that come with PHP7. The course it self
+Hi, that course is about to cover the basics of new features, that come with PHP7. The course itself
 is living in a gitbub repository https://github.com/phpingme/courses, feel free to contribute to it.
 
 
