@@ -68,7 +68,7 @@ success: group-use-declarations
 
 ## Group use Declarations
 
-The ```use``` statement brings an ability to shortcut ```class```, ```function``` and ```const``` namespaces, at was always a lot of typing, but lets the code besides look better. Now it is possible to reduce an amount of ```use``` statements if the classes have the same parent namespace, and it looks like that:
+The ```use``` statement brings an ability to shortcut ```class```, ```function``` and ```const``` namespaces, it was always a lot of typing. Now it is possible to reduce an amount of ```use``` statements if the classes have the same parent namespace, and it looks like that:
 
 ```php
 <?php
@@ -130,12 +130,12 @@ All it needs, is a ```declare(strict_types=1)``` directive placed at the beginni
 
 ```php
 <?php
-declare(strict_types=1)
+declare(strict_types=1);
 function product(int $a, int $b){
-  return $a*$b
+  return $a*$b;
 }
 
-product(2, 3) // returns 6
+product(2, 3); // returns 6
 ```
 
 > try in editor below  to implement and call a function that takes float arguments and returns it's sum.
