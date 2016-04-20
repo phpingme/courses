@@ -2,12 +2,17 @@
 head:
   title: "Php7 Introduction Course"
 ---
+## Php7 Introduction Course
+Hi, that course is about to cover the basics of new features, that come with PHP7. The course it self
+is living in a gitbub repository https://github.com/phpingme/courses, feel free to contribute to it.
+
+
 ## Combined Comparison Operator
 
 A new operator ```<=>``` that is also know as "spaceship operator" and is also exists
 for example in [Ruby](http://ruby-doc.org/core-1.9.3/Comparable.html). All it does it compares to expressions like this:
 ```php
-
+<?php
   // lefthand expression is lexically larger than righthand one
   "Foo" <=> "foo" // return 1
 
@@ -19,11 +24,11 @@ for example in [Ruby](http://ruby-doc.org/core-1.9.3/Comparable.html). All it do
 
 ```
 
-use PHP Repl below and compare float value 5.7 with integer 7
+> To pass this Task use PHP Repl below and compare float value 5.6 with integer 7
 
 ```repl
 ---
-match: \s?5\.7\s?\<=\>\s?7
+match: \s?5\.6\s?\<=\>\s?7
 success: null-coalesce-operator
 ---
 ```
@@ -34,20 +39,24 @@ Another syntax sugar is to shorthand notation for ```isset``` function with coal
 For example an array offset check like this one:
 
 ```php
+<?php
 $foo = ['a'=>1, 'b'=>2];
 
 $bar = isset($foo['some'])? $foo['some'] : 'another';
 ```
 you can know write with a *coalesce* :
 ```php
-$bar = $foo['some'] ?? 'another';
-// also with chaining
-$bar_a = $foo['some'] ?? $foo['a'] ?? 'another';
+<?php
+$foo = ['a'=>1, 'b'=>2];
+$foo['some'] ?? 'another'; // outputs 'another';
+
+// it also works with chaining
+$foo['some'] ?? $foo['a'] ?? 'another'; // just try it in a Repl below
 
 ```
 
 
-try PHP Repl and try check offset key 'c' of array $foo from above
+> as a task, try PHP Repl and try to apply ```??``` Operator to array element ```$foo['c']``` from above
 
 ```repl
 ---
@@ -62,28 +71,54 @@ success: group-use-declarations
 The ```use``` statement brings an ability to shortcut ```class```, ```function``` and ```const``` namespaces, at was always a lot of typing, but lets the code besides look better. Now it is possible to reduce an amount of ```use``` statements if the classes have the same parent namespace, and it looks like that:
 
 ```php
-use Foo\Bar\Class1;
-use Foo\Bar\Class2 as ClassTwo;
-use Foo\Bar\Class3 as three;
+<?php
 
-// or for php7+ just
+// the why it could be written on php7+ for classes
 use Foo\Bar\{Class1, Class2 as ClassTwo, Class3 as three};
 
+// for functions
+use function some\namespace\{fn_a, fn_b, fn_c};
+
+// for constants
+use const some\namespace\{SomeConst, ConstB as B, ConstC as C};
 ```
 
-> as a task take a look at classes in https://github.com/php-fig/log/blob/master/Psr/Log and provide a use group statement for a few of them, and var_dump one of them
+> as a task, extend a code below in a way that the following string appears in an output:
+
+> **"i'm doing php7 intro course on phping.me"**
+
 
 ```editor+repl
 <?php
 
-use // ... declare use group
+namespace Some\FuncsAndConsts {
 
-var_dump(/* classname */)
+  const COURSE = "php7 intro";
+
+  const PROJECT = "phping.me";
+
+  function onProject($arg) {
+    return $arg;
+  }
+
+  function doCourse($projectName, $courseName){
+    return sprintf("i'm doing %s course on %s", $courseName, $projectName);
+  }
+
+}
+
+namespace {
+
+  // TASK is here: add "use .." statements, so that the command below, outputs:
+  // "i'm doing php7 intro course on phping.me"
+
+  echo doCourse(onProject(P), C) , PHP_EOL;
+}
 
 ---
 match:
- - use\s+Psr\\Log\\\{
- - var_dump\?
+ - use\s+const\s+Some\\FuncsAndConsts\\\{
+ - use\s+function\s+Some\\FuncsAndConsts\\\{
 success: scalar-type-declarations
 ---
 
@@ -91,9 +126,10 @@ success: scalar-type-declarations
 
 ## Scalar Type Declarations
 PHP7 comes with a new optional mode to declare a scalar type arguments explicitly by its type: ```int```, ```float```, ```bool```, ```string```.
-All it needs is a ```declare(strict_types=1)``` directive placed at the beginning of a php script file, where you want to use it.
+All it needs, is a ```declare(strict_types=1)``` directive placed at the beginning of a php script file, where you want to use it.
 
 ```php
+<?php
 declare(strict_types=1)
 function product(int $a, int $b){
   return $a*$b
@@ -102,7 +138,8 @@ function product(int $a, int $b){
 product(2, 3) // returns 6
 ```
 
-try in PHP editor below implement and call a function that takes float arguments and returns it's sum:
+> try in editor below  to implement and call a function that takes float arguments and returns it's sum.
+
 ```editor+repl
 <?php
 ---
@@ -149,7 +186,7 @@ foreach(sumToStack([1,2,3], [4,5,6], [7,8,9]) as $sum){
 // 6
 ```
 
-> as a task write the same function as before but let it return ```SplQueue``` object(instaed of ```SplStack```)
+> as a task write the same function as before but let it return ```SplQueue``` object(instaed of ```SplStack```), if you didn't use it before take a look at php documentation http://php.net/manual/en/class.splqueue.php
 
 ```editor+repl
 <?php
@@ -160,10 +197,11 @@ foreach(sumToStack([1,2,3], [4,5,6], [7,8,9]) as $sum){
 ```
 
 ## Return Type Invariance
-To specify return types on a class level, one should be aware, that once returned type is specifed, it can not be overwritten by any child classes.
+To specify return types on a class level, one should be aware, that once a returned type is specified, it can not be overwritten by any child classes.
 
 for example:
 ```php
+<?php
  class MyStack extends SplStack {}
 
  class A
@@ -184,9 +222,9 @@ for example:
 
 
 ```
-Here we will get an ```E_COMPILE_ERROR``` couse of breaked *invariance*.
+Here we will get an ```E_COMPILE_ERROR``` cause of broken *invariance*.
 
-> as a Task, overwrite class A to interface and let class B declare and return the right type.
+> as a task, make out of ```class``` A an ```interface``` and let ```class``` B declare and return a correct return type.
 
 ```editor+repl
 <?php
@@ -211,7 +249,7 @@ They can be handled just like normal classes, means they can:
 
 for example
 ```php
-
+<?php
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
@@ -232,7 +270,7 @@ stdOutTest(new class  implements LoggerInterface {
 ```
 
 > as a Task, overwrite an anonymous class in example in a way, that
-> ```stdOutTest``` function works with following body. Use of constructor and class properties.
+> ```stdOutTest``` function works with following body. As a tip - use constructor and class properties for anonymous class.
 >```php
 >function stdOutTest(LoggerInterface $logger){
 >  $logger->log($logger->level, "test");
@@ -251,8 +289,11 @@ function stdOutTest(LoggerInterface $logger){
   $logger->log($logger->level, "test");
 }
 
-stdOutTest( // anonymous class
-  )
+stdOutTest(new class(/*level*/)  implements LoggerInterface {
+
+    /*implementation*/
+
+} )
 ---
 match: class\s?\(\s?LogLevel::\w+\s?\)
 success: closure-call-method
@@ -262,10 +303,10 @@ success: closure-call-method
 
 
 ## Closure call() Method
-Everyone how have to write some mature javascript code, couldn't oversee how excessive js community take use of this construct. In PHP it has absolutely the same goal and functionality, it provides a method to inject an object instance and arguments into closure function and look like this:
+Everyone who have to write some mature javascript code, couldn't oversee how excessive js community take use of the ```call``` method. For now it's also in PHP and has absolutely the same goal and functionality, it enables an injection of an object instance and arguments into closure function and look like this:
 
 ```php
-
+<?php
 class MyStorage extends SplStack{}
 
 $closure = function($elem){
@@ -279,7 +320,7 @@ $stack = $closure->call($stack, 2);
 echo $stack->pop(); // return 2
 ```
 
-> as an exercise let ```MyStorage``` class exentds from ```SplQueue``` and run the rest of above example as it is.
+> as an exercise let ```MyStorage``` class extends from ```SplQueue``` and run the rest of above example as it is.
 
 ```editor+repl
 <?php
@@ -310,7 +351,7 @@ interface Throwable
 
 for example:
 ```php
-
+<?php
 try{
 
  (function($obj) {
@@ -330,7 +371,7 @@ try{
 Also take a look at how owe closure function was called, it follows the following pattern ```(function () {})()``` and it follows IIFE syntax from JS.
 
 
-> as a task catch a specific ```Error``` child instance (```ParseError```, ```TypeError```, ...) of the following closure function:
+> as a task find out a specific ```Error``` child instance (```ParseError```, ```TypeError```, ...) and catch it for the following closure function:
 >```php
 >(function(callable $obj) {
 >   $obj->call();
@@ -356,18 +397,20 @@ success: expectations
 To prove if the the some expression is true, you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throwing an instance of ```AssertionError```.
 
 ```php
-
+<?php
 ini_set('assert.exception', 1);
 assert(false);
 ```
 
-> as a task extend an ```assert()``` function with a second argument as an instance of ```AssertionError``` that takes a custom message as it's constructor argument, just like you would do it with Exception, and surely catch an Error.
+> as a task add  a second argument to an ```assert()``` function, namely the one that have to be an instance of ```AssertionError``` with a custom message as it's constructor argument, just like you would do it with Exception, and surely catch an Error.
 
 ```editor+repl
 <?php
 
 ini_set('assert.exception', 1);
-// your assert function within try/catch block
+
+// your assert(false, ...) function within a try/catch block
+
 
 ---
 match:
@@ -381,6 +424,7 @@ success: generator-return-expressions
 The use case of iterating smth. is pretty common in php applications, less often is applying an object oriented way to work with iteration. Mostly cause of it bloat up [Iterator](http://php.net/manual/en/class.iterator.php) interface. Generator is a simple way to do it by prepending an ```yield``` operator. But that is actually it. For more advanced use cases like multitasking in coroutine context Generator was quite counterintuitive and made implementing multitasking features quite cumbersome.  With PHP 7+ it's possible to declare a final return expression of a Generator instance.
 
 ```php
+<?php
 $generator = (function(int $index){
   yield $index++;
   return $index;
@@ -393,7 +437,7 @@ echo $generator->getReturn(); // return 2
 
 ```
 
-> as an exercise add some more ```yield``` operators within a closure body from example above and just take a look so that returned value gets to **3**.
+> as an exercise try to add some more ```yield``` operators within a closure body from example above so, that returned value gets to **3**.
 
 ```editor+repl
 <?php
@@ -409,6 +453,7 @@ success: generator-delegation
 Another quiet handy feature in terms of making Generator more handy is it's delegation. In other words along with returning an expression, you can also return another Generator by referencing with ```yield from``` expression to it.
 
 ```php
+<?php
 $generator = (function(int $index){
   yield $index++;
   return yield from generatorPow($index);
@@ -430,7 +475,7 @@ echo $generator->getReturn();
 // 2
 
 ```
-> as an exercise let the function *generatorPow* from the example above also get delegeted generator, the one that enables the the whole output like:
+> as an exercise let the function *generatorPow* from the example above also get delegated generator, the one that enables the the whole output like:
 ```
 >1
 >4
@@ -446,7 +491,7 @@ $generator = (function(int $index){
   return yield from generatorPow($index);
 })(1);
 
-// overwrite generatorPow function and write a new one that gets delegated to generatorPow
+// overwrite generatorPow function and add a new one, that gives a generator to generatorPow
 
 
 // output part
@@ -464,6 +509,7 @@ success: reflection-additions
 Reflections in php was always a nice tool to inspect classes and when necessary tweak their behavior, for example for tests. In PHP 7 comes with a new reflection classes for Generator namely ```ReflectionGenerator```, and a ```ReflectionType``` that extends an existing reflection classes (```ReflectionParameter```, ```ReflectionFunctionAbstract```) on order to give an access to newly introduced Type Declarations for scalar values and return expressions.
 
 ```php
+<?php
 $reflector = new ReflectionGenerator((function(){
   yield 'hello';
 })());
@@ -483,7 +529,7 @@ var_dump($reflector->getThis()); // NULL
   echo $str;
 })()
 ```
-> be injected in ```ReflectionGenerator``` instance and let resulted instance output any string you like. For that you may be want to recover a ```Generator``` api http://php.net/manual/de/class.generator.php
+> be injected in ```ReflectionGenerator``` instance and let resulted instance output any string you like. For that you may be want to recover a ```Generator``` api http://php.net/manual/de/class.generator.php and specifically the method ```Generator::send```
 
 
 ```editor+repl
@@ -496,4 +542,4 @@ success: congrats
 ```
 ## Congrats
 
-Cool, you've covered the most interesting and useful parts of PHP7. It was not hard.
+Cool, you've covered the most interesting and useful parts of PHP7. It was not hard. Also, if you have an idea, how we can improve it, just open an issue or make a pull request on https://github.com/phpingme/courses
