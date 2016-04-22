@@ -3,8 +3,7 @@ head:
   title: "Php7 Introduction Course"
 ---
 ## Php7 Introduction Course
-Hi, this course is about to cover the basics of new features, that come with PHP7. The course itself
-is living in a gitbub repository https://github.com/phpingme/courses, feel free to contribute to it.
+Hi, this course covers the basics of new features that come with PHP7. This course lives on a github repository https://github.com/phpingme/courses, feel free to contribute to it.
 
 
 ## Combined Comparison Operator
@@ -24,7 +23,7 @@ for example in [Ruby](http://ruby-doc.org/core-1.9.3/Comparable.html). All it do
 
 ```
 
-> To pass this Task use PHP Repl below and compare float value 5.6 with integer 7
+> To pass this Task use PHP REPL below and compare float value 5.6 with integer 7
 
 ```repl
 ---
@@ -83,7 +82,7 @@ use function some\namespace\{fn_a, fn_b, fn_c};
 use const some\namespace\{SomeConst, ConstB as B, ConstC as C};
 ```
 
-> as a task, extend a code below in a way that the following string appears in an output:
+> as a task, extend a code below in a way that the following string appears as the output:
 
 > **"i'm doing php7 intro course on phping.me"**
 
