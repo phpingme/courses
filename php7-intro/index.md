@@ -247,7 +247,7 @@ This will throw a ```E_COMPILE_ERROR``` because of broken *invariance*.
 
 ## Anonymous Classes
 
-The concept of anonymous classes are already available in quite a range of programming languages from Java to Ruby. Since PHP now a days is mostly used for object oriented programming (We just need to forget about Wordpress here ;)), anonymous classes definitely make sense in for simple *pass and forget* objects. Also use cases like testing and talking to libraries in general can make use of anonymous classes.
+The concept of anonymous class is already available in quite a range of programming languages from Java to Ruby. Since PHP nowadays is mostly used for object oriented programming (We just need to forget about Wordpress here ;)), anonymous classes definitely make sense for simple *pass and forget* objects. Also use cases like testing and talking to libraries in general can make use of anonymous classes.
 
 They can be handled just like normal classes, means they can:
 - implement interfaces
