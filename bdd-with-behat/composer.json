@@ -1,0 +1,17 @@
+{
+    "name": "phpingme-courses/bdd-with-behat",
+    "description": "Course for BDD with behat",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vsevolod Dolgopolov",
+            "email": "zavalit@gmail.com"
+        }
+    ],
+    "homepage": "http://phping.me/courses/bdd-with-behat",
+    "keywords": ["bdd", "behat", "php7", "tutorial", "course"],
+    "require": {
+      "php": ">=7.0",
+      "behat/behat": "^3.1"
+    }
+}

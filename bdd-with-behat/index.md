@@ -20,52 +20,60 @@ The concept of **Feature** in BDD let us focus on a specific problem from a pers
 To introduce a Feature we use quite the same pattern we apply to describe a user story, namely:
 ```html
    In order to <achieve a goal>
-   As <the stakeholder who wants the goal>
-   I want <something>
+   As a <stakeholder>
+   I want to <do something>
 ```
-For a developer the 3'd line is most likely always clear, it handles an outcome of implementation, like *Product could be ordered*, *Post has hidden comments*... But it's not always clear about first two lines, especially if stuff have to be implemented in a microservice scope, where a customer could be less personalizable.
+For a developer the 3'd line is most likely always clear, it describes an outcome of implementation, like *Product could be ordered*, *Post comments can be blocked*... But it's not always clear about first two lines, especially if stuff have to be implemented in a microservice scope, where a customer could be less personalizable.
 Here is important to work with PO and apply a [Ubiquitous Language](http://martinfowler.com/bliki/UbiquitousLanguage.html) of a domain you are implementing.
 
 ### Scenario
-**Scenario** is an essential part of the whole BDD process, they are the part that describe a behaviour of our software. Each Scenario follows the following *Given-When-Then* schema:
+**Scenario** is an essential part of the whole BDD process, this is a part that describes a behaviour of our software. Each Scenario follows the following *Given-When-Then* schema:
 ```html
   Given <initial state>
   When <apply a change to the state>
   Then <verify a changed state>
 ```
 
+### Initiate BDD environment.
+
 To start to write Features, let's first initiate environment where we want to write it.
+```bash
+$> vendor/bin/behat --init
+```
+be default it creates a following tree structure:
+```bash
+.
++-- features
+|   +-- bootstrap
+|       +-- FeatureContext.php   
 
-```sh
-    vendor/bin/behat --init
 ```
 
-it creates a following tree structure:
-```
-```
+### Create a first feature
 
-Now let's create a first feature ```features/calculator.feature``` (you can do it with a write click on **features** folder) with a first Scenario:
+In this course we will try to provide a BDD spec for some small but pretty calculator. And we start with our first feature. Let's create a .feature file with the following file path ```features/calculator.feature``` (you can do it with a write click on **features** folder) with a first Scenario:
 ```
 Feature: Calculator
   In order to know the results of calculation
   As a user
   I want to get numbers calculated
 
- Scenario: Get the right calculation
-   Given i need to calculate a Factorial of "5"
-   When a execute a calculation
-   Then i get "120" back.
+  Scenario: Calculate a factorial
+    Given i need to calculate a factorial of "5"
+    When i execute a factorial calculation
+    Then i get "120" back
 ```
 
+As you see we defined our Feature in a user story form, and then the first Scenario that describes a way a calculation of factorial have to be calculated from a user perspective. The one problem here, we describe here just a "happy path", what if we want to calculate a factorial of 6, should it be still 120?
 
-> An actual Task, write the second scenario that checks factorial doesn't return a wrong result back.
+> An actual Task, write the second scenario which checks that factorial of 6 doesn't have to give 120 back.
 
 ### Solution
 ```
- Scenario: Don't get the wrong calculation
-   Given i need to calculate a Factorial of "5"
-   When i execute a calculation
-   Then i don't get the "121" back.
+Scenario: Calculate a right factorial
+  Given i need to calculate a factorial of "6"
+  When i execute a factorial calculation
+  Then i don't get the "120" back
 ```
 
 
@@ -81,15 +89,15 @@ match_file:
 
 ## Implementing test first
 
-After we define our feature that describes a constraints of a factorial task. Lets implement a test for it and take an advantage of behat as well.
+Now, since we have our feature described, we can implement a test for it and take an advantage of behat as well.
 First of all, we need to convert our feature in a PHP form. For that, let's run:
 ```sh
-  vendor/bin/behat --append-snippets
+$> vendor/bin/behat --append-snippets
 ```
-Out of 6 steps we get 4 methods in **features/bootstrap/FeatureContext.php**, that throws a **Pending** exception, where each method is responsible for a concrete one line in a Scenario.
-We have to have the same *Given* and *Then* descriptions in both of our Scenarios, that's why behat apply the same methods in **FeatureContext** class for them, the only that is variable are arguments and that will be passed in as a method parameters.
-And we have two different *When*, for them we get another to methods that have to separately check task passing or non passing.
+Out of 6 Scenario steps we will get 4 methods in **features/bootstrap/FeatureContext.php**, that throws a **Pending** exception, where each method is responsible for a concrete Scenario step.
+We have to have the same *Given* and *Then* descriptions in both of our Scenarios, that's why behat apply the same methods in **FeatureContext** class for them, the only thing, that use to be variable - are values provided within method arguments. For example in case of factorial of "5" and factorial of "6".
 
+And we have two different *When*, for them we get another to methods that have to separately check whether calculation is ok or not.
 To start implement the test, let's create an empty **Factorial** class in an application root. And make it look like this:
 ```php
 <?php
@@ -105,83 +113,105 @@ class Factorial {
 
 ```
 
-
 Try to run behat again, just execute ```vendor/bin/behat```, and see on STDOUT, it has to look smth. like this:
 ```
 2 scenarios (2 pending)
 6 steps (2 pending, 4 skipped)
 ```
 
-First we want to do is resolve pending steps. To achieve it, we need to overwrite ```throw new PendingException();``` in our autogenerated ```features/bootstrap/FeatureContext.php``` with a real implementation. Let's start with the first method ```thereIsATaskToFindFactorialOf``` for a first **Given** step and put a code like this:
+First we want to do is resolve pending steps. To achieve it, we need to overwrite ```throw new PendingException();``` in our autogenerated ```features/bootstrap/FeatureContext.php``` with a real implementation. Let's start with the first **Given** step and put a code like this:
 ```php
 <?php
 ...
-
-    /**
-     * @Given there is a task to find factorial of :arg1
-     */
-    public function thereIsATaskToFindFactorialOf($arg1)
-    {
-        $this->input = $arg1;
-    }
+  /**
+   * @Given i need to calculate a Factorial of :arg1
+   */
+  public function iNeedToCalculateAFactorialOf($arg1)
+  {
+      $this->factorialInput = $arg1;
+  }
 ```
 
-Then we go to the following **When** step, controlled by ```theSolutionIs``` method, that can be implemented like this:
+Then we go to the following **When** step, controlled by ```iExecuteAFactorialCalculation``` method, that can be implemented like this:
 ```php
+<?php
+...
   /**
-   * @When a solution is equal to :arg1
+   * @When i execute a factorial calculation
    */
-  public function aSolutionIsEqualTo($arg1)
+  public function iExecuteAFactorialCalculation()
   {
-      $this->isEqual = ($arg1 === (new Factorial())($this->input));
+      $this->result = (new Factorial())($this->factrorialInput);
   }
+
 ```
 
 And now the the most nice part, checking whether the app we build run, the way we expect it. We will do it in a php7 way a take usage of ```assert()``` function(it needs an extra ```ini_set('assert.exception', 1)```).
 ```php
-   /**
-    * @Then i passed the task
-    */
-   public function iPassedTheTask()
-   {
-       ini_set('assert.exception', 1);
-       assert($this->isEqual, new AssertionError('Factorial return a wrong result'));
-   }
+<?php  
+...
+  /**
+   * @Then i get :arg1 back.
+   */
+  public function iGetBack($arg1)
+  {
+    ini_set('assert.exception', 1);
+    assert($this->result === (int)$arg1, new AssertionError('Factorial return a wrong result'));
+  }
 ```
 and for negotiation case:
 ```php
-   /**
-    * @Then i didn't pass the task
-    */
-   public function iPassedTheTask()
-   {
-       ini_set('assert.exception', 1);
-       assert(!$this->isEqual, new AssertionError('Factorial have to return a proper result'));
-   }
+<?php
+...
+  /**
+   * @Then i don't get the :arg1 back.
+   */
+  public function iDonTGetTheBack($arg1)
+  {
+    ini_set('assert.exception', 1);
+    assert($this->result !== (int)$arg1, new AssertionError('Factorial have to return a proper result'));
+  }
 ```
 
-let's try to run it, the output now, have to look like this:
+let's try to run it: ```vendor/bin/behat```, the output now, have to look like this:
 ```
 2 scenarios (1 passed, 1 failed)
 6 steps (5 passed, 1 failed)
 ```
 
-And as you see from 2 Scenarios, we have 1 that already pass. It's kinda freaky to see that smth. working without we implement anything, but from outside perspective it just right that factorial ships wrong results.
+And as you see from 2 Scenarios, we have 1 that already pass. It feels freaky that smth. working without we implement anything, but from outside perspective it just right, that factorial ships a wrong results if there is no proper factorial implementation.
 
-> It's quite obvious step that is still open, namely implementation of a factorial. To pass this course step, implement a Factorial and run behat in order to check that both from out 2 scenarios are passing.
+> It's quite obvious step to do, namely implementation of a factorial calculation. To pass this course step, implement a ```Factorial``` class and run behat in order to check that both from out 2 scenarios are passing.
+
+### Solution
+```php
+<?php
+declare(strict_types=1);
+
+class Factorial
+{
+  public function __invoke(int $number, int $factorial = 1) : int
+  {
+    while ($number > 0) {
+        return $this->__invoke($number - 1, $factorial * $number);
+    }
+    return $factorial;
+  }
+}
+```
 
 ```projecteditor+terminal
 ---
 match_output:
   match:
-   - 2 scenarios \(2 passed|3 scenarios \(3 passed
+   - 2 scenarios \(2 passed
 ---
 ```
 
 ## Applying Scenario Outline
 
-Now you now the basics. The rest of the course we make it more suitable for a daily work.
-You may noticed that our feature scenarios is bit duplicated, even a autogenerated snipptes for a ```FeatureContext.php``` resolved it in a way that for 6 steps we got 4 methods, we can simply reduce it to 3.
+At that point you have to understand basics of BDD with behat. The rest of the course we will try to make our tests more suitable for a daily work.
+You may noticed that our feature scenarios are a bit duplicated, even a autogenerated snipptes for a ```FeatureContext.php``` resolved it in a way that for 6 steps we got 4 methods, we can simply reduce it to 3.
 
 To achieve it, we will use **Scenario Outline**. The general it could look like  following:
 ```html
@@ -203,23 +233,29 @@ Let's take a look how we can overwrite course feature.
 
 ```html
 Scenario Outline: Calculate a Factorial
-  Given an <input>
-  When a solution is equal to <result>
-  Then the outcome is <outcome>
+  Given i need to calculate a factorial of <input>
+  When i execute a factorial calculation
+  Then i get <result> back
 
   Examples:
-    | input | result | outcome    |
-    | 5     | 120    | 'right'    |
-    | 5     | 121    | 'wrong'    |
-    | 0     | 1      | 'right'    |
+    | input | result |
+    | 5     | 120    |
+    | 6     | 720    |
 ```
-As you can see we can even extend with any other input/result/outcome combination and be flexible to edit this.
+As you can see we can even extend with any other input/result combination and be flexible to edit this. We also get rid of negotiation scenario, cause we can cover in generic way each possible input, without need to copy paste our scenario block.
 Each **Examples** row will be handled as separate Scenario, so the the whole test context will be reinitiated for each row respectively.
 
-run ```vendor/bin/behat --append-snippets``` and you get just 3 methods to implement.
 
-> To pass this course step, rewrite ```FeatureContext``` in a way that it passes the Scenario Outline, the resulted test run, have to output:  **3 scenarios (3 passed)**
+> To pass this course step, extend Scenario Outline Examples with the case of factorial of 0, that has to be equal 1. The resulted test run, have to output:  **3 scenarios (3 passed)**
 
+### Solution
+```
+Examples:
+  | input | result |
+  | 5     | 120    |
+  | 6     | 720    |
+  | 0     | 1      |
+```
 
 ```projecteditor+terminal
 ---
@@ -227,7 +263,7 @@ match_output:
   match:
    - 3 scenarios \(3 passed
 match_file:
-  path: /features/course.feature
+  path: /features/calculator.feature
   match:
    - Scenario [O|o]utline
 ---
@@ -236,14 +272,14 @@ match_file:
 
 ## Role driven behaviour
 
-After we learned how to write compact and at the same time powerful scenarios, let's take a look, at how we can apply different use cases in a different php test context files.
+After we learned how to write compact and at the same time powerful scenarios, let's take a look at how we can apply different use cases in a different php test context files.
 
-Let's create another feature, say for course manager who has to be able to publish/unpublish a course. For the sake of simplicity we will refer to the same Factorial implementation. Create ```features/admin.feature``` file and put the following content there:
+Let's create another feature for calculator admin who has to be able to activate/deactivate some specific calculations for what ever reason. For the sake of simplicity we will refer to the same Factorial implementation. Create ```features/admin.feature``` file and put the following content there:
 ```
 Feature: Administration
-  In order to learn about programming
+  In order to control a calculation appearance
   As an admin
-  I want to be able to control a calculation appearance
+  I want to be able to deactivate/activate it
 
  Scenario Outline: Activate/Deactivate Calculation
    Given there is a calculation of <calculation> of any random number
@@ -258,9 +294,9 @@ Feature: Administration
 
 ```
 
-Here we want to apply different php test context file as for Calculation feature, because it has pretty much another perspective and in that way needs another logic for populating a context state.
+Here we would definitely want to apply a different php test context file as for calculation feature, because it has pretty much another perspective and needs another logic for populating a context state.
 
-For that case we create in an application root a ```behat.yml``` file and pass the default execution behaviour of behat in a way it's suites our feature definition.
+For that case we create in an application root a ```behat.yml``` file and pass the default execution flow of behat in a way it suites our feature definition.
 
 ```
 default:
@@ -274,12 +310,12 @@ default:
             filters:  { role: admin }
             contexts: [ AdminContext ]
 ```
-You definetly have noticed a ```{ role: <role> }``` pattern applied to **filters**. The certain **role** corelates directly to role identifacations in a feature file definition:
+You definitely have noticed a ```{ role: <role> }``` pattern applied to **filters**. The certain **role** correlates directly to role identifications in a feature file definition:
 
 ```
 Feature: ...
   In order to ...
-  As an **admin**
+  As an admin
   I want ...
 ```
 An **admin** role in a ```As an admin``` line of a Feature head is a meaningful statement for our application specification, that can be used to apply a certain php test context to it.
@@ -368,7 +404,7 @@ Further, all that mapping have to be a part of application core(and move away fr
 
 now run the tests:
 ```bash
-   vendor/bin/behat --role admin
+$>  vendor/bin/behat --role admin
 ```
 
 and the output have to be most likely like this:
@@ -377,32 +413,34 @@ and the output have to be most likely like this:
 3 scenarios (2 passed, 1 failed)
 9 steps (8 passed, 1 failed)
 ```
-> As Task extend our Factorial class Implementation so that it pass the tests.
+> As Task extend our Factorial class Implementation so that it pass the tests. And run ```vendor/bin/behat --role admin``` again
 
 ### Solution
 ```php
 <?php
+declare(strict_types=1);
 
-class Factorial {
-
-  public function __construct($activated = true)
+class Factorial
+{
+  public function __construct(bool $activated = true)
   {
-  	$this->activated = $activated;
+      $this->activated = $activated;
   }
 
-  public function __invoke($number, $factorial = 1)
+  public function __invoke(int $number, int $factorial = 1) : int
   {
-  	if(!$this->activated){
-  		throw new Error('Factorial is deactivated');
-  	}
-  	return $this->calculate($number, $factorial);
+    if (!$this->activated) {
+      throw new Error('Factorial is deactivated');
+    }
+    return $this->calculate($number, $factorial);
   }
 
-  private function calculate($number, $factorial) {
-  	while($number > 0){
-  		return $this->calculate($number - 1, $factorial * $number);
-  	}
-  	return $factorial;
+  private function calculate(int $number, int $factorial) : int
+  {
+    while ($number > 0) {
+      return $this->calculate($number - 1, $factorial * $number);
+    }
+    return $factorial;
   }
 }
 ```

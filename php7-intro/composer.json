@@ -8,6 +8,8 @@
             "email": "zavalit@gmail.com"
         }
     ],
+    "homepage": "http://phping.me/courses/php7-intro",
+    "keywords": ["php7", "tutorial", "course"],
     "require": {
       "php": ">=7.0",
       "psr/log": "^1.0"
