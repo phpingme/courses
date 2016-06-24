@@ -2,7 +2,7 @@
 head:
   title: "Php7 Introduction Course"
 ---
-## Php7 Introduction Course
+## Introduction
 Hi, this course covers the basics of new features that come with PHP7. It lives on a github repository https://github.com/phpingme/courses, feel free to contribute to it.
 
 
@@ -24,10 +24,16 @@ A new operator ```<=>``` also known as "spaceship operator" has been added to PH
 
 > To pass this task, please use PHP REPL below and compare the float value 5.6 with integer 7
 
-```repl
+### Solution
+```php
+5.6 <=> 7
+```
+
+```editor+repl
 ---
-match: \s?5\.6\s?\<=\>\s?7
-success: null-coalesce-operator
+match_input:
+  match:
+   - \s?5\.6\s?\<=\>\s?7
 ---
 ```
 
@@ -40,27 +46,37 @@ Another syntactic sugar is the shorthand notation for ```isset``` function which
 $foo = ['a'=>1, 'b'=>2];
 
 // Before PHP7
+isset($foo['a'])? $foo['a'] : 'another'; // outputs '1'
+isset($foo['b'])? $foo['b'] : 'another'; // outputs '2'
 isset($foo['some'])? $foo['some'] : 'another'; // outputs 'another'
-```
-With PHP7 you can do the same in a much simpler way with the new ```??``` operator:
 
-```php
-<?php
-$foo = ['a'=>1, 'b'=>2];
+// With PHP7
+$foo['a'] ?? 'another'; // outputs '1'
+$foo['b'] ?? 'another'; // outputs '2'
 $foo['some'] ?? 'another'; // outputs 'another';
 
 // it also works with chaining
-$foo['some'] ?? $foo['a'] ?? 'another'; // just try it in the PHP REPL below
+$foo['some'] ?? $foo['a'] ?? 'another'; // just try to echo it in the Editor on place
 
 ```
 
 > As a task, use PHP REPL below and apply ```??``` operator on array element ```$foo['c']``` from above example
 
-```repl
+### Solution
+```php
+<?php
+...
+echo $foo['c'] ?? 'key "c" has no value';
+```
+
+```editor+repl
+<?php
+
+$foo = ['a'=>1, 'b'=>2];
 ---
-fixture: $foo = ['a'=>1, 'b'=>2];
-match: \$foo\['c'\]\s?\?\?
-success: group-use-declarations
+match_input:
+  match:
+   - \$foo\['c'\]\s?\?\?
 ---
 ```
 
@@ -85,10 +101,19 @@ use function some\namespace\{fn_a, fn_b, fn_c};
 use const some\namespace\{SomeConst, ConstB as B, ConstC as C};
 ```
 
-> As a task, extend the code below so that the following string appears as the output:
+> As a task, extend the code in a worksheet in a way it works. All you need is two define 2 ```use``` expressions.
+One for functions and one for constants.
 
-> **"i'm doing php7 intro course on phping.me"**
+### Solution
+```php
+<?php
 
+  ...
+  use function Some\FuncsAndConsts\{doCourse, onProject};
+  use const Some\FuncsAndConsts\{COURSE as C, PROJECT as P};
+  ...
+
+```
 
 ```editor+repl
 <?php
@@ -118,10 +143,10 @@ namespace {
 }
 
 ---
-match:
- - use\s+const\s+Some\\FuncsAndConsts\\\{
- - use\s+function\s+Some\\FuncsAndConsts\\\{
-success: scalar-type-declarations
+match_input:
+  match:
+   - use\s+const\s+Some\\FuncsAndConsts\\\{
+   - use\s+function\s+Some\\FuncsAndConsts\\\{
 ---
 
 ```
@@ -140,18 +165,30 @@ function product(int $a, int $b){
   return $a * $b;
 }
 
-product(2, 3); // outputs 6
+echo product(2, 3); // outputs 6
 ```
 
-> Try to rewrite above in the editor below to implement and call a function that takes float arguments and returns it's sum.
+> Try to rewrite above in a worksheet to implement and call a function that takes float arguments and returns it's sum.
+
+### Solution
+```php
+<?php
+
+declare(strict_types=1);
+
+function sum(float $a, float $b){
+  return $a + $b;
+}
+
+echo sum(2.5, 3.1); // outputs 5.6
+```
 
 ```editor+repl
-<?php
 ---
-match:
-  - declare\(strict_types=1\)
-  - \(float\s+
-success: return-type-declarations
+match_input:
+  match:
+    - declare\(strict_types=1\)
+    - \(float\s+
 ---
 ```
 
@@ -196,11 +233,30 @@ foreach(sumToStack([1,2,3], [4,5,6], [7,8,9]) as $sum) {
 
 > As the task adjust the above function to return ```SplQueue``` object (instaed of ```SplStack```), if you have not used any of those before, take a look at the PHP documentation http://php.net/manual/en/class.splqueue.php
 
-```editor+repl
+### Solution
+```php
 <?php
+function sumToStack(array ...$arr): SplQueue{
+
+  $stack = new SplQueue();
+  array_map(function(array $a) use ($stack): bool {
+      return $stack->push(array_sum($a));
+    }, $arr);
+
+    return $stack;
+}
+
+foreach(sumToStack([1,2,3], [4,5,6], [7,8,9]) as $sum) {
+    echo $sum . PHP_EOL;
+}
+
+```
+
+```editor+repl
 ---
- match: \)\s?:\s+SplQueue
- success: return-type-invariance
+match_input:
+ match:
+  - \)\s?:\s+SplQueue
 ---
 ```
 
@@ -236,12 +292,11 @@ This will throw a ```E_COMPILE_ERROR``` because of broken *invariance*.
 > As a task, change the ```class``` A to an ```interface``` and let ```class``` B's createStack method declare and return a correct return type.
 
 ```editor+repl
-<?php
 ---
- match:
-  - interface A
-  - \)\s?:\s+SplStack
- success: anonymous-classes
+match_input:
+  match:
+   - interface A
+   - \)\s?:\s+SplStack
 ---
 ```
 
@@ -302,8 +357,9 @@ stdOutTest(new class(/*level*/)  implements LoggerInterface {
 
 } )
 ---
-match: class\s?\(\s?LogLevel::\w+\s?\)
-success: closure-call-method
+match_input:
+ match:
+  - class\s?\(\s?LogLevel::\w+\s?\)
 ---
 
 ```
@@ -330,18 +386,11 @@ echo $stack->pop(); // return 2
 > As an exercise let ```MyStorage``` class extends from ```SplQueue``` and run the rest of above example as it is.
 
 ```editor+repl
-<?php
-
-
-
-
-
-
 ---
-match:
- - extends\s+SplQueue
- - ->pop\(
-success: expectations
+match_input:
+  match:
+   - extends\s+SplQueue
+   - ->pop\(
 ---
 ```
 
@@ -398,8 +447,9 @@ Also take a look at how the closure function was called above, it follows the pa
 })(null);
 
 ---
-match: catch\s?\(\s?TypeError
-success: expectations
+match_input:
+  match:
+    - catch\s?\(\s?TypeError
 ---
 ```
 
@@ -424,16 +474,16 @@ ini_set('assert.exception', 1);
 
 
 ---
-match:
-- AssertionError
-- catch\s?\(
-success: generator-return-expressions
+match_input:
+  match:
+  - AssertionError
+  - catch\s?\(
 ---
 ```
 
 ## Generator Return Expressions
 
-The use case of iterating something is pretty common in php applications, it is less often done with the object oriented way to work with iteration, mostly cause of it bloat up tto do it with the [Iterator](http://php.net/manual/en/class.iterator.php) interface. Generator is a simple way to do it by prepending an ```yield``` operator, but that is actually it. 
+The use case of iterating something is pretty common in php applications, it is less often done with the object oriented way to work with iteration, mostly cause of it bloat up tto do it with the [Iterator](http://php.net/manual/en/class.iterator.php) interface. Generator is a simple way to do it by prepending an ```yield``` operator, but that is actually it.
 
 For more advanced use cases like multitasking in coroutine context Generator was quite counterintuitive and which made implementing multitasking features quite cumbersome.  With PHP7, now it's possible to declare a final return expression of a Generator instance.
 
@@ -454,11 +504,10 @@ echo $generator->getReturn(); // return 2
 > As an exercise, rewrite the above code and try to add some more ```yield``` operators within the closure body, so that it returns a value **3**.
 
 ```editor+repl
-<?php
-
 ---
-match_output: 3
-success: generator-delegation
+match_output:
+  match:
+   - 3
 ---
 ```
 
@@ -505,7 +554,7 @@ $generator = (function(int $index){
   return yield from generatorPow($index);
 })(1);
 
-// overwrite generatorPow function and add a new one, that gives a generator to generatorPow
+// write a new generatorPow function, that also return a generator
 
 
 // output part
@@ -514,8 +563,11 @@ foreach($generator as $item){
 }
 echo $generator->getReturn();
 ---
-match_output: 1416
-success: reflection-additions
+match_output:
+  match:
+    - 1
+    - 4
+    - 16
 ---
 ```
 
@@ -549,13 +601,12 @@ var_dump($reflector->getThis()); // NULL
 
 
 ```editor+repl
-<?php
-
 ---
-match: getExecutingGenerator\(\s?\)->send
-success: congrats
+match_input:
+  match:
+    - getExecutingGenerator\(\s?\)->send
 ---
 ```
-## Congrats
+## Conclusion
 
 Cool, now you've covered the most interesting and useful parts of PHP7, It was not hard right? ;). Also, if you have any suggestions to make this better just open an issue or make a pull request on https://github.com/phpingme/courses
