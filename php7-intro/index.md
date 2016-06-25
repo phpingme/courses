@@ -291,6 +291,26 @@ This will throw a ```E_COMPILE_ERROR``` because of broken *invariance*.
 
 > As a task, change the ```class``` A to an ```interface``` and let ```class``` B's createStack method declare and return a correct return type.
 
+### Solution
+```php
+<?php
+ class MyStack extends SplStack {}
+
+ interface A
+ {
+   public function createStack() : SplStack;
+ }
+
+ class B implements A
+ {
+   public function createStack() : SplStack
+   {
+      return new MyStack();
+   }
+ }
+```
+
+
 ```editor+repl
 ---
 match_input:
@@ -341,6 +361,26 @@ stdOutTest(new class implements LoggerInterface {
 >}
 >```
 
+### Solution
+```php
+<?php
+...
+stdOutTest(new class(LogLevel::INFO) implements LoggerInterface {
+  public $level;
+
+  public function __construct($level)
+  {
+    $this->level = $level;
+  }
+
+  public function log($level, $message, array $context = [])
+  {
+    echo $message;
+  }
+});
+
+```
+
 ```editor+repl
 <?php
 use Psr\Log\LoggerInterface;
@@ -366,7 +406,7 @@ match_input:
 
 ## Closure call() Method
 
-Anyone who has written some serious javascript code, could have overseen how excessive JS community take use of the ```call``` method. Now it's available in PHP7 and has absolutely the same goal and functionality. It enables injection of object instance and arguments into a closure function, It looks like this:
+Anyone who has written some serious plain javascript code, have definitely not overseen how excessive JS community take use of the ```call``` method. Now it's available in PHP7 and has absolutely the same goal and functionality. It enables injection of object instance and arguments into a closure function. It looks like this:
 
 ```php
 <?php
@@ -379,24 +419,33 @@ $closure = function($elem){
 
 $stack = $closure->call(new MyStorage(), 1);
 $stack = $closure->call($stack, 2);
+$stack->rewind();
 
-echo $stack->pop(); // return 2
+echo $stack->current(); // return 2
 ```
 
-> As an exercise let ```MyStorage``` class extends from ```SplQueue``` and run the rest of above example as it is.
+> As an exercise let ```MyStorage``` class extends from ```SplQueue``` and run the rest of above example as it is. You have to see that output is now have to be **1** instead of **2** in SplStack case
+
+### Solution
+```php
+<?php
+  class MyStorage extends SplQueue {}
+  // the rest is the same as in example
+  // ...
+```
 
 ```editor+repl
 ---
 match_input:
   match:
    - extends\s+SplQueue
-   - ->pop\(
+   - ->current\(
 ---
 ```
 
 ## Exceptions in the Engine
 
-It was always pretty straightforward to build a ```try/catch``` based error handling in php. The side effect of that simplicity was that PHP engine errors and business domain violations have to be catched with an instance of ``` Exception```. With PHP7 fatal and recoverable fatal errors from now on throw an instance of ```Error```.  The new hierarchy is the following:
+It was always pretty straightforward to build a ```try/catch``` based error handling in php. The side effect of that simplicity was that PHP engine errors and business domain violations have to be catched with an instance of ``` Exception```. With PHP7 fatal and recoverable fatal errors from now on will be thrown as an instance of ```Error```.  The new hierarchy is the following:
 ```
 interface Throwable
     |- Exception implements Throwable
@@ -408,6 +457,7 @@ interface Throwable
         |- ArithmeticError extends Error
             |- DivisionByZeroError extends ArithmeticError
 ```
+As you see all about implementation errors get ```Error``` instance. The Domain Logic can be from now own be handled by ```Exception```
 
 For example:
 
@@ -438,6 +488,19 @@ Also take a look at how the closure function was called above, it follows the pa
 >})(null);
 >```
 
+### Solution
+```php
+<?php
+
+try{
+  (function(callable $obj) {
+    $obj->call();
+  })(null);
+} catch (TypeError $e){
+  echo $e->getMessage();
+}
+```
+
 ```editor+repl
 <?php
 
@@ -455,7 +518,7 @@ match_input:
 
 ## Expectations
 
-To prove if the some expression is true, you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throw an instance of ```AssertionError```.
+Everyone have to be familiar with [PHPUnit assertio methods](https://phpunit.de/manual/current/en/appendixes.assertions.html), but some times it can be an overkill, or we may be we just need a well defined assertions in a production environment. For that case - to prove if the some expression is true - you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throw an instance of ```AssertionError```.
 
 ```php
 <?php
@@ -464,6 +527,21 @@ assert(false);
 ```
 
 > As a task add a second argument to an ```assert()``` function, the one that have to be an instance of ```AssertionError``` with a custom message as it's constructor argument, just like you would do it with Exception, and make sure to catch the Error.
+
+### Solution
+```php
+<?php
+
+ini_set('assert.exception', 1);
+
+try{
+  assert(false, new AssertionError("false have to be true"));
+} catch (AssertionError $e) {
+  echo $e->getMessage();
+}
+
+
+```
 
 ```editor+repl
 <?php
@@ -503,6 +581,17 @@ echo $generator->getReturn(); // return 2
 
 > As an exercise, rewrite the above code and try to add some more ```yield``` operators within the closure body, so that it returns a value **3**.
 
+### Solution
+```php
+<?php
+$generator = (function(int $index){
+  yield $index++;
+  yield $index++;
+  return $index;
+})(1);
+...
+```
+
 ```editor+repl
 ---
 match_output:
@@ -513,48 +602,17 @@ match_output:
 
 ## Generator Delegation
 
-Another quiet handy feature in terms of making Generator more useful is it's delegation. In other words along with returning an expression, you can also return another Generator by referencing with ```yield from``` expression to it.
+Another quiet handy feature in terms of making Generator more useful is it's delegation. In other words along with returning an expression, you can also return another Generator, Traversable Object or just an array by referencing to it by ```yield from``` keyword.
 
 ```php
 <?php
 $generator = (function(int $index){
   yield $index++;
-  return yield from generatorPow($index);
-})(1);
-
-function generatorPow(int $index){
-  yield pow($index, $index);
-  return $index;
-}
-
-foreach($generator as $item){
-    echo $item, PHP_EOL;   
-}
-echo $generator->getReturn();
-
-// output
-// 1
-// 4
-// 2
-
-```
-> As an exercise, let the function *generatorPow* from the example above also get delegated generator, so that whole output changes like this:
-```
->1
->4
->16
->```
-
-
-```editor+repl
-<?php
-
-$generator = (function(int $index){
+  yield from [$index++];
+  yield from new ArrayIterator([$index++]);
   yield $index++;
-  return yield from generatorPow($index);
+  return $index;
 })(1);
-
-// write a new generatorPow function, that also return a generator
 
 
 // output part
@@ -562,18 +620,73 @@ foreach($generator as $item){
     echo $item, PHP_EOL;   
 }
 echo $generator->getReturn();
+// output
+// 1
+// 2
+// 3
+// 4
+// 5
+
+```
+> You can see in the Example above, that ```yield from``` keyword gets everything but Generator. As an exercise, move ```yield from [$index++];``` and  ```yield from new ArrayIterator([$index++])``` into separate functions and let the closure's ```yield from``` keyword accept just Generators. The output have to be the same.
+
+### Solution
+```php
+<?php
+
+$generator = (function(int $index){
+  yield $index++;
+  yield from incArray($index);
+  yield from incIterator($index);
+  yield $index++;
+  return $index;
+})(1);
+
+function incArray(&$index) {
+	yield from [$index++];
+}
+
+function incIterator(&$index) {
+	yield from new ArrayIterator([$index++]);
+}
+```
+
+```editor+repl
+<?php
+
+$generator = (function(int $index){
+  yield $index++;
+  yield from /* Generator */
+  yield from /* Another Generator */
+  yield $index++;
+  return $index;
+})(1);
+
+// put here your two functions.
+
+// output part
+foreach($generator as $item){
+    echo $item, PHP_EOL;   
+}
+echo $generator->getReturn();
 ---
+match_input:
+  match:
+   - function\s+\w.[\s\S]*yield\s+from\s+\[.*?\]
+   - function\s+\w.[\s\S]*yield\s+from\s+new\s+ArrayIterator\s?\(
 match_output:
   match:
     - 1
+    - 2
+    - 3
     - 4
-    - 16
+    - 5
 ---
 ```
 
 ## Reflection Additions
 
-Reflections in PHP was always a nice tool to inspect classes and when necessary tweak also to their behavior, for example for tests. In PHP7 it comes with a new reflection class for Generator namely ```ReflectionGenerator```, and a ```ReflectionType``` that extends an existing reflection classes (```ReflectionParameter```, ```ReflectionFunctionAbstract```) in order to give the access to newly introduced return type declarations for scalar type hints and return expressions.
+Reflections in PHP was always a nice tool to inspect classes and when necessary also to tweak their behavior, for example for tests. And it quite obvious, that with new features for Generator there have to be new Reflection api to handle this. In PHP7 it comes with a new reflection class for Generator, namely ```ReflectionGenerator```, and a ```ReflectionType``` that extends an existing reflection classes (```ReflectionParameter```, ```ReflectionFunctionAbstract```) in order to give the access to newly introduced return type declarations for scalar type hints and return expressions.
 
 ```php
 <?php
@@ -597,10 +710,28 @@ var_dump($reflector->getThis()); // NULL
   echo $str;
 })()
 ```
-> be injected in ```ReflectionGenerator``` instance and let resulted instance output any string that you like. To do this you may want to take a look at the ```Generator``` documentation http://php.net/manual/de/class.generator.php and specifically the method ```Generator::send```
+> be injected in ```ReflectionGenerator``` instance and let the resulted instance output any string that you like. To do this you may want to take a look at the ```Generator``` documentation http://php.net/manual/de/class.generator.php and specifically the method ```Generator::send```
 
+### Solution
+```php
+<?php
+ $reflector = new ReflectionGenerator((function(){
+  $str = yield;
+  echo $str;
+})());
+
+echo $reflector->getExecutingGenerator()->send('hello');
+```
 
 ```editor+repl
+<?php
+ $reflector = new ReflectionGenerator(
+   // put in task defined closure
+);
+
+
+echo $reflector->...
+
 ---
 match_input:
   match:
