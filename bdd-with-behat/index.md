@@ -3,6 +3,7 @@
   title: "BDD with Behat"
  commands:
    - vendor/bin/behat
+ template: task+data
 ---
 
 ## Introduction
@@ -78,7 +79,7 @@ Scenario: Calculate a right factorial
 
 
 
-```projecteditor+terminal
+```task+data
 ---
 match_file:
   path: /features/calculator.feature
@@ -200,7 +201,7 @@ class Factorial
 }
 ```
 
-```projecteditor+terminal
+```task+data
 ---
 match_output:
   match:
@@ -257,7 +258,7 @@ Examples:
   | 0     | 1      |
 ```
 
-```projecteditor+terminal
+```task+data
 ---
 match_output:
   match:
@@ -445,7 +446,7 @@ class Factorial
 }
 ```
 
-```projecteditor+terminal
+```task+data
 ---
 match_output:
   match:

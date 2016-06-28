@@ -1,6 +1,8 @@
 ---
 head:
   title: "Php7 Introduction Course"
+template: editor+stdout
+
 ---
 ## Introduction
 Hi, this course covers the basics of new features that come with PHP7. It lives on a github repository https://github.com/phpingme/courses, feel free to contribute to it.
@@ -29,7 +31,7 @@ A new operator ```<=>``` also known as "spaceship operator" has been added to PH
 5.6 <=> 7
 ```
 
-```editor+repl
+```task+data
 ---
 match_input:
   match:
@@ -69,7 +71,7 @@ $foo['some'] ?? $foo['a'] ?? 'another'; // just try to echo it in the Editor on 
 echo $foo['c'] ?? 'key "c" has no value';
 ```
 
-```editor+repl
+```task+data
 <?php
 
 $foo = ['a'=>1, 'b'=>2];
@@ -115,7 +117,7 @@ One for functions and one for constants.
 
 ```
 
-```editor+repl
+```task+data
 <?php
 
 namespace Some\FuncsAndConsts {
@@ -183,7 +185,7 @@ function sum(float $a, float $b){
 echo sum(2.5, 3.1); // outputs 5.6
 ```
 
-```editor+repl
+```task+data
 ---
 match_input:
   match:
@@ -252,7 +254,7 @@ foreach(sumToStack([1,2,3], [4,5,6], [7,8,9]) as $sum) {
 
 ```
 
-```editor+repl
+```task+data
 ---
 match_input:
  match:
@@ -311,7 +313,7 @@ This will throw a ```E_COMPILE_ERROR``` because of broken *invariance*.
 ```
 
 
-```editor+repl
+```task+data
 ---
 match_input:
   match:
@@ -381,7 +383,7 @@ stdOutTest(new class(LogLevel::INFO) implements LoggerInterface {
 
 ```
 
-```editor+repl
+```task+data
 <?php
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -434,7 +436,7 @@ echo $stack->current(); // return 2
   // ...
 ```
 
-```editor+repl
+```task+data
 ---
 match_input:
   match:
@@ -501,7 +503,7 @@ try{
 }
 ```
 
-```editor+repl
+```task+data
 <?php
 
 // try and catch it
@@ -518,7 +520,7 @@ match_input:
 
 ## Expectations
 
-Everyone have to be familiar with [PHPUnit assertio methods](https://phpunit.de/manual/current/en/appendixes.assertions.html), but some times it can be an overkill, or we may be we just need a well defined assertions in a production environment. For that case - to prove if the some expression is true - you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throw an instance of ```AssertionError```.
+Everyone have to be familiar with [PHPUnit assertion methods](https://phpunit.de/manual/current/en/appendixes.assertions.html), but some times it can be an overkill, or we may be we just need a well defined assertions in a production environment. For that case - to prove if the some expression is true - you can use ```assert()``` function, and with ```ini_set('assert.exception', 1);``` it enables to throw an instance of ```AssertionError```.
 
 ```php
 <?php
@@ -543,7 +545,7 @@ try{
 
 ```
 
-```editor+repl
+```task+data
 <?php
 
 ini_set('assert.exception', 1);
@@ -592,7 +594,7 @@ $generator = (function(int $index){
 ...
 ```
 
-```editor+repl
+```task+data
 ---
 match_output:
   match:
@@ -651,7 +653,7 @@ function incIterator(&$index) {
 }
 ```
 
-```editor+repl
+```task+data
 <?php
 
 $generator = (function(int $index){
@@ -723,7 +725,7 @@ var_dump($reflector->getThis()); // NULL
 echo $reflector->getExecutingGenerator()->send('hello');
 ```
 
-```editor+repl
+```task+data
 <?php
  $reflector = new ReflectionGenerator(
    // put in task defined closure
