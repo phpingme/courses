@@ -3,7 +3,7 @@ head:
   title: "How to create your own php course on phping.me"
 ---
 
-# How To Create your own Course.
+# How To Create your own Course
 
 ## 1. Create an index.md
 
