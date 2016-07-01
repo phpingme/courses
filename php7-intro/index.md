@@ -335,24 +335,20 @@ They can be handled just like normal classes, means they can:
 For example:
 
 ```php
-<?php
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
+stdOutTest(new class(LogLevel::INFO) implements LoggerInterface {
+  public $level;
+  use LoggerTrait;
 
-function stdOutTest(LoggerInterface $logger){
-  $logger->log(LogLevel::INFO, "test");
-}
+  public function __construct($level)
+  {
+    $this->level = $level;
+  }
 
-stdOutTest(new class implements LoggerInterface {
-
-    use Psr\Log\LoggerTrait;
-
-    public function log($level, $message, array $context = array())
-    {
-        echo $message;
-    }
+  public function log($level, $message, array $context = [])
+  {
+    echo $message;
+  }
 });
-
 ```
 
 > As a Task, rewrite the anonymous class example above in a way that,
