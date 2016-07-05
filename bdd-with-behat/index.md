@@ -8,7 +8,7 @@
 
 ## Introduction
 
-To develop a software is always about managing a lot of moving parts. And pretty often it gets messy, in a way that even a developer who wrote the code, cannot recover what is going on after 2-3 weeks the code was shipped.  It is an old problem and had a range of mature concepts around that helps to deal with in a sufficient way. Here we will try a BDD, and show how we can control a software's feature set and move quickly forwards using behat.
+To develop a software is always about managing a lot of moving parts. And pretty often it gets messy, in a way that even a developer who wrote the code, cannot recover what is going on after 2-3 weeks the code was shipped.  It is an old problem and had a range of mature concepts around that helps to deal with in a sufficient way. Here we will try a BDD, and show how we can control a software's feature set and move quickly forwards using behat. Course data itself is living on [https://github.com/phpingme/courses](https://github.com/phpingme/courses/blob/drafts/bdd-with-behat/index.md), feel free to contribute, it's open source.
 
 
 
