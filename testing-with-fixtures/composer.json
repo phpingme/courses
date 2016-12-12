@@ -1,0 +1,18 @@
+{
+    "name": "phpingme-courses/testing-with-fixtures",
+    "description": "Course for Testing with Fixtures",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vsevolod Dolgopolov",
+            "email": "zavalit@gmail.com"
+        }
+    ],
+    "homepage": "http://phping.me/courses/testing-with-fixtures",
+    "keywords": ["testing", "fixtures", "faker", "alice", "course"],
+    "require": {
+      "php": ">=7.0",
+      "fzaninotto/faker": "^1.6",
+      "nelmio/alice": "^2.2"
+    }
+}
